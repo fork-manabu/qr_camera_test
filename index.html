@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5-QRCode サンプル</title>
+    <!-- ライブラリの読み込み (CDN) -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #reader {
+            width: 100%;
+            max-width: 500px;
+            margin: 15px auto;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            margin: 5px;
+        }
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .btn-stop {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>QRコードリーダー</h2>
+    
+    <!-- カメラ起動 / 停止ボタン -->
+    <button id="start-btn" class="btn">カメラを起動する</button>
+    <button id="stop-btn" class="btn btn-stop" disabled>停止する</button>
+
+    <!-- カメラ映像を表示する要素 -->
+    <div id="reader"></div>
+
+    <!-- 読み取り結果を表示するエリア -->
+    <div id="result">ここに読み取り結果が表示されます</div>
+
+    <script>
+        const html5QrCode = new Html5Qrcode("reader");
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const resultDiv = document.getElementById('result');
+
+        // URLかどうか判定する関数
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;  
+            }
+        }
+
+        // 読み取り成功時の処理
+        function onScanSuccess(decodedText, decodedResult) {
+            console.log(`Scan result: ${decodedText}`, decodedResult);
+            resultDiv.innerText = `読み取り成功: ${decodedText}`;
+
+            // 1. スキャンを一時停止（連続起動を防ぐ）
+            stopCamera();
+
+            // 2. URLであれば別タブ（別窓）で開く
+            if (isValidUrl(decodedText)) {
+                window.open(decodedText, '_blank', 'noopener,noreferrer');
+            } else {
+                alert(`読み取ったテキスト: ${decodedText}\n※URLではないためページは開けませんでした。`);
+            }
+        }
+
+        // カメラ起動処理
+        function startCamera() {
+            html5QrCode.start(
+                { facingMode: "environment" }, // 背面カメラ
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                onScanSuccess,
+                (errorMessage) => { /* スキャン中のエラー無視 */ }
+            ).then(() => {
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                resultDiv.innerText = "スキャン中...";
+            }).catch((err) => {
+                console.error("カメラの起動に失敗しました", err);
+                alert("カメラの起動に失敗しました。");
+            });
+        }
+
+        // カメラ停止処理
+        function stopCamera() {
+            html5QrCode.stop().then(() => {
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            }).catch((err) => {
+                console.error("カメラの停止に失敗しました", err);
+            });
+        }
+
+        // イベントリスナーの設定
+        startBtn.addEventListener('click', startCamera);
+        stopBtn.addEventListener('click', stopCamera);
+    </script>
+</body>
+</html>
