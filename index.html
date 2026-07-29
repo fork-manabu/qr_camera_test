@@ -152,6 +152,11 @@
             // 1. スキャンを一時停止（連続起動を防ぐ）
             stopCamera();
 
+            // テスト: URLなら自動で別タブを開く
+            if (isValidUrl(decodedText)) {
+                window.open(decodedText, '_blank', 'noopener,noreferrer');
+            }
+
             // 2. URLであれば結果エリアを押せるリンクボタンにする
             if (isValidUrl(decodedText)) {
                 enableResultLink(decodedText);
