@@ -16,8 +16,6 @@
         }
         #reader {
             width: 100%;
-            max-width: 500px;
-            margin: 15px auto;
             border: 1px solid #d9d9d9;
             border-radius: 10px;
             overflow: hidden;
@@ -26,7 +24,6 @@
         .reader-wrap {
             position: relative;
             width: 100%;
-            max-width: 500px;
             margin: 15px auto;
         }
         .reader-controls {
@@ -46,7 +43,6 @@
             display: block;
             width: 100%;
             max-width: 100px;
-            border-radius: 50px;
             margin: 0 auto;
             padding: 12px 16px;
             border-radius: 8px;
@@ -57,7 +53,6 @@
             text-decoration: none;
             transition: background-color 0.2s ease;
             box-sizing: border-box;
-   
         }
         .result-link-btn:hover {
             background-color: #eef3f6;
@@ -86,6 +81,11 @@
         .btn-stop {
             background-color: #dc3545;
         }
+        #start-btn {
+            display: block;
+            margin: 0 auto;
+            border-radius: 50px;
+        }
         .container {
             display: none;
             position: fixed;
@@ -106,6 +106,24 @@
             max-width: 540px;
             position: relative;
         }
+        .container__close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            color: #7b8794;
+            border-radius: 4px;
+        }
+        .container__close-btn:hover {
+            color: #1f2933;
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 <body>
@@ -117,27 +135,25 @@
     
     <div class="container" id="modal">
         <div class="container__dialog">
-        <!-- カメラ映像と停止ボタン -->
-        <div class="reader-wrap">
-            <div id="reader-controls" class="reader-controls is-hidden">
-                <button id="stop-btn" class="btn btn-stop" disabled>停止する</button>
+            <button class="container__close-btn" id="close-btn" aria-label="閉じる">&times;</button>
+            <div class="reader-wrap">
+                <div id="reader-controls" class="reader-controls is-hidden">
+                    <button id="stop-btn" class="btn btn-stop" disabled>停止する</button>
+                </div>
+                <div id="reader"></div>
             </div>
-            <div id="reader"></div>
-        </div>
-
-        <!-- 読み取り結果を表示するエリア -->
-        <div id="result">
-            <a
-                id="result-link"
-                class="result-link-btn is-disabled"
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-disabled="true"
-            >
-                ここに読み取り結果が表示されます
-            </a>
-        </div>
+            <div id="result">
+                <a
+                    id="result-link"
+                    class="result-link-btn is-disabled"
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-disabled="true"
+                >
+                    ここに読み取り結果が表示されます
+                </a>
+            </div>
         </div>
     </div>
 
@@ -149,6 +165,7 @@
         const readerControls = document.getElementById('reader-controls');
         const resultLink = document.getElementById('result-link');
         const modal = document.getElementById('modal');
+        const closeBtn = document.getElementById('close-btn');
 
         function disableResultLink(message) {
             resultLink.innerText = message;
@@ -178,16 +195,10 @@
         function onScanSuccess(decodedText, decodedResult) {
             console.log(`Scan result: ${decodedText}`, decodedResult);
 
-            // 1. スキャンを一時停止（連続起動を防ぐ）
             stopCamera();
 
-            // テスト: URLなら自動で別タブを開く
             if (isValidUrl(decodedText)) {
                 window.open(decodedText, '_blank', 'noopener,noreferrer');
-            }
-
-            // 2. URLであれば結果エリアを押せるリンクボタンにする
-            if (isValidUrl(decodedText)) {
                 enableResultLink(decodedText);
             } else {
                 disableResultLink(`読み取り成功: ${decodedText}（URLではありません）`);
@@ -231,6 +242,7 @@
         // イベントリスナーの設定
         startBtn.addEventListener('click', startCamera);
         stopBtn.addEventListener('click', stopCamera);
+        closeBtn.addEventListener('click', stopCamera);
     </script>
 </body>
 </html>
