@@ -12,6 +12,7 @@
             font-family: sans-serif;
             text-align: center;
             padding: 20px;
+            background-color: #f0f0f0;
         }
         #reader {
             width: 100%;
@@ -56,9 +57,7 @@
             text-decoration: none;
             transition: background-color 0.2s ease;
             box-sizing: border-box;
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
+   
         }
         .result-link-btn:hover {
             background-color: #eef3f6;
@@ -87,6 +86,26 @@
         .btn-stop {
             background-color: #dc3545;
         }
+        .container {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        .container.is-open {
+            display: flex;
+        }
+        .container__dialog {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            width: 90%;
+            max-width: 540px;
+            position: relative;
+        }
     </style>
 </head>
 <body>
@@ -96,27 +115,32 @@
     <!-- カメラ起動 / 停止ボタン -->
     <button id="start-btn" class="btn">カメラを起動する</button>
     
-    <!-- カメラ映像と停止ボタン -->
-    <div class="reader-wrap">
-        <div id="reader-controls" class="reader-controls is-hidden">
-            <button id="stop-btn" class="btn btn-stop" disabled>停止する</button>
+    <div class="container" id="modal">
+        <div class="container__dialog">
+        <!-- カメラ映像と停止ボタン -->
+        <div class="reader-wrap">
+            <div id="reader-controls" class="reader-controls is-hidden">
+                <button id="stop-btn" class="btn btn-stop" disabled>停止する</button>
+            </div>
+            <div id="reader"></div>
         </div>
-        <div id="reader"></div>
+
+        <!-- 読み取り結果を表示するエリア -->
+        <div id="result">
+            <a
+                id="result-link"
+                class="result-link-btn is-disabled"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-disabled="true"
+            >
+                ここに読み取り結果が表示されます
+            </a>
+        </div>
+        </div>
     </div>
 
-    <!-- 読み取り結果を表示するエリア -->
-    <div id="result">
-        <a
-            id="result-link"
-            class="result-link-btn is-disabled"
-            href="#"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-disabled="true"
-        >
-            ここに読み取り結果が表示されます
-        </a>
-    </div>
 
     <script>
         const html5QrCode = new Html5Qrcode("reader");
@@ -124,6 +148,7 @@
         const stopBtn = document.getElementById('stop-btn');
         const readerControls = document.getElementById('reader-controls');
         const resultLink = document.getElementById('result-link');
+        const modal = document.getElementById('modal');
 
         function disableResultLink(message) {
             resultLink.innerText = message;
@@ -180,6 +205,7 @@
                 onScanSuccess,
                 (errorMessage) => { /* スキャン中のエラー無視 */ }
             ).then(() => {
+                modal.classList.add('is-open');
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
                 readerControls.classList.remove('is-hidden');
@@ -193,6 +219,7 @@
         // カメラ停止処理
         function stopCamera() {
             html5QrCode.stop().then(() => {
+                modal.classList.remove('is-open');
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
                 readerControls.classList.add('is-hidden');
