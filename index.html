@@ -208,6 +208,9 @@
 
         // カメラ起動処理
         function startCamera() {
+            modal.classList.add('is-open');
+            disableResultLink('スキャン中...');
+
             html5QrCode.start(
                 { facingMode: "environment" }, // 背面カメラ
                 {
@@ -217,12 +220,11 @@
                 onScanSuccess,
                 (errorMessage) => { /* スキャン中のエラー無視 */ }
             ).then(() => {
-                modal.classList.add('is-open');
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
                 readerControls.classList.remove('is-hidden');
-                disableResultLink('スキャン中...');
             }).catch((err) => {
+                modal.classList.remove('is-open');
                 console.error("カメラの起動に失敗しました", err);
                 alert("カメラの起動に失敗しました。");
             });
