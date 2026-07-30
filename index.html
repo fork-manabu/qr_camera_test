@@ -199,7 +199,6 @@
             stopCamera();
 
             if (isValidUrl(decodedText)) {
-                window.open(decodedText, '_blank', 'noopener,noreferrer');
                 enableResultLink(decodedText);
             } else {
                 disableResultLink(`読み取り成功: ${decodedText}（URLではありません）`);
@@ -215,7 +214,10 @@
                 { facingMode: "environment" }, // 背面カメラ
                 {
                     fps: 10,
-                    qrbox: { width: 250, height: 250 }
+                    qrbox: (w, h) => {
+                        const size = Math.min(w, h) * 0.8;
+                        return { width: size, height: size };
+                    }
                 },
                 onScanSuccess,
                 (errorMessage) => { /* スキャン中のエラー無視 */ }
