@@ -90,6 +90,6 @@ class QrRead {
 }
 
 export function qrRead(): void {
-    new QrRead().init();
+    document.addEventListener('DOMContentLoaded', () => new QrRead().init());
 }
 

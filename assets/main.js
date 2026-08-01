@@ -29364,89 +29364,92 @@
     return Html5QrcodeScanner2;
   }();
 
-  // src/main.ts
-  var html5QrCode = new Html5Qrcode("reader");
-  var startBtn = document.getElementById("start-btn");
-  var stopBtn = document.getElementById("stop-btn");
-  var readerControls = document.getElementById("reader-controls");
-  var resultLink = document.getElementById("result-link");
-  var modal = document.getElementById("modal");
-  var closeBtn = document.getElementById("close-btn");
-  var readerWrap = document.querySelector(".reader-wrap");
-  function disableResultLink(message) {
-    resultLink.innerText = message;
-    resultLink.href = "#";
-    resultLink.classList.add("is-disabled");
-    resultLink.setAttribute("aria-disabled", "true");
-  }
-  function enableResultLink(url) {
-    resultLink.innerText = `\u8AAD\u307F\u53D6\u308A\u6210\u529F: ${url}`;
-    resultLink.href = url;
-    resultLink.classList.remove("is-disabled");
-    resultLink.setAttribute("aria-disabled", "false");
-  }
-  function isValidUrl(value) {
-    try {
-      new URL(value);
-      return true;
-    } catch {
-      return false;
+  // src/modules/campaign/qrRead.ts
+  var QrRead = class _QrRead {
+    constructor() {
+      this.html5QrCode = new Html5Qrcode("reader");
+      this.startBtn = document.querySelector(".js-qr-start-btn");
+      this.resultLink = document.querySelector(".js-qr-result-link");
+      this.modal = document.querySelector(".js-qr-modal");
+      this.closeBtn = document.querySelector(".js-qr-close-btn");
+      this.readerWrap = document.querySelector(".js-qr-reader");
     }
-  }
-  function onScanSuccess(decodedText) {
-    console.log(`Scan result: ${decodedText}`);
-    html5QrCode.stop().then(() => {
-      startBtn.disabled = false;
-      stopBtn.disabled = true;
-      readerControls.classList.add("is-hidden");
-      readerWrap.classList.add("is-hidden");
-      if (isValidUrl(decodedText)) {
-        enableResultLink(decodedText);
-      } else {
-        disableResultLink(`\u8AAD\u307F\u53D6\u308A\u6210\u529F: ${decodedText}\uFF08URL\u3067\u306F\u3042\u308A\u307E\u305B\u3093\uFF09`);
+    init() {
+      this.startBtn.addEventListener("click", () => this.onStartCamera());
+      this.closeBtn.addEventListener("click", () => this.onStopCamera());
+    }
+    disableResultLink(message) {
+      this.resultLink.innerText = message;
+      this.resultLink.href = "#";
+      this.resultLink.classList.add("is-disabled");
+      this.resultLink.setAttribute("aria-disabled", "true");
+    }
+    enableResultLink(url) {
+      this.resultLink.innerText = `\u8AAD\u307F\u53D6\u308A\u6210\u529F: ${url}`;
+      this.resultLink.href = url;
+      this.resultLink.classList.remove("is-disabled");
+      this.resultLink.setAttribute("aria-disabled", "false");
+    }
+    static isValidUrl(value) {
+      try {
+        new URL(value);
+        return true;
+      } catch {
+        return false;
       }
-    }).catch((err) => {
-      console.error("\u30AB\u30E1\u30E9\u306E\u505C\u6B62\u306B\u5931\u6557\u3057\u307E\u3057\u305F", err);
-    });
-  }
-  function startCamera() {
-    modal.classList.add("is-open");
-    disableResultLink("\u30B9\u30AD\u30E3\u30F3\u4E2D...");
-    html5QrCode.start(
-      { facingMode: "environment" },
-      {
-        fps: 10,
-        qrbox: (w, h) => {
-          const size = Math.min(w, h) * 0.8;
-          return { width: size, height: size };
+    }
+    onScanSuccess(decodedText) {
+      console.log(`Scan result: ${decodedText}`);
+      this.html5QrCode.stop().then(() => {
+        this.startBtn.disabled = false;
+        this.readerWrap.classList.add("is-hidden");
+        if (_QrRead.isValidUrl(decodedText)) {
+          this.enableResultLink(decodedText);
+        } else {
+          this.disableResultLink(`\u8AAD\u307F\u53D6\u308A\u6210\u529F: ${decodedText}\uFF08URL\u3067\u306F\u3042\u308A\u307E\u305B\u3093\uFF09`);
         }
-      },
-      onScanSuccess,
-      () => {
-      }
-    ).then(() => {
-      startBtn.disabled = true;
-      stopBtn.disabled = false;
-      readerControls.classList.remove("is-hidden");
-    }).catch((err) => {
-      modal.classList.remove("is-open");
-      console.error("\u30AB\u30E1\u30E9\u306E\u8D77\u52D5\u306B\u5931\u6557\u3057\u307E\u3057\u305F", err);
-      alert("\u30AB\u30E1\u30E9\u306E\u8D77\u52D5\u306B\u5931\u6557\u3057\u307E\u3057\u305F\u3002");
-    });
+      }).catch((err) => {
+        console.error("\u30AB\u30E1\u30E9\u306E\u505C\u6B62\u306B\u5931\u6557\u3057\u307E\u3057\u305F", err);
+      });
+    }
+    onStartCamera() {
+      this.modal.classList.add("is-open");
+      this.disableResultLink("\u30B9\u30AD\u30E3\u30F3\u4E2D...");
+      this.html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: (w, h) => {
+            const size = Math.min(w, h) * 0.8;
+            return { width: size, height: size };
+          }
+        },
+        (decodedText) => this.onScanSuccess(decodedText),
+        () => {
+        }
+      ).then(() => {
+        this.startBtn.disabled = true;
+      }).catch((err) => {
+        this.modal.classList.remove("is-open");
+        console.error("\u30AB\u30E1\u30E9\u306E\u8D77\u52D5\u306B\u5931\u6557\u3057\u307E\u3057\u305F", err);
+        alert("\u30AB\u30E1\u30E9\u306E\u8D77\u52D5\u306B\u5931\u6557\u3057\u307E\u3057\u305F\u3002");
+      });
+    }
+    onStopCamera() {
+      this.html5QrCode.stop().then(() => {
+        this.modal.classList.remove("is-open");
+        this.readerWrap.classList.remove("is-hidden");
+        this.startBtn.disabled = false;
+        this.disableResultLink("\u3053\u3053\u306B\u8AAD\u307F\u53D6\u308A\u7D50\u679C\u304C\u8868\u793A\u3055\u308C\u307E\u3059");
+      }).catch((err) => {
+        console.error("\u30AB\u30E1\u30E9\u306E\u505C\u6B62\u306B\u5931\u6557\u3057\u307E\u3057\u305F", err);
+      });
+    }
+  };
+  function qrRead() {
+    document.addEventListener("DOMContentLoaded", () => new QrRead().init());
   }
-  function stopCamera() {
-    html5QrCode.stop().then(() => {
-      modal.classList.remove("is-open");
-      readerWrap.classList.remove("is-hidden");
-      startBtn.disabled = false;
-      stopBtn.disabled = true;
-      readerControls.classList.add("is-hidden");
-      disableResultLink("\u3053\u3053\u306B\u8AAD\u307F\u53D6\u308A\u7D50\u679C\u304C\u8868\u793A\u3055\u308C\u307E\u3059");
-    }).catch((err) => {
-      console.error("\u30AB\u30E1\u30E9\u306E\u505C\u6B62\u306B\u5931\u6557\u3057\u307E\u3057\u305F", err);
-    });
-  }
-  startBtn.addEventListener("click", startCamera);
-  stopBtn.addEventListener("click", stopCamera);
-  closeBtn.addEventListener("click", stopCamera);
+
+  // src/main.ts
+  qrRead();
 })();
