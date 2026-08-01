@@ -5,133 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>HTML5-QRCode サンプル</title>
-    <!-- ライブラリの読み込み (CDN) -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <style>
-        body {
-            font-family: sans-serif;
-            text-align: center;
-            padding: 20px;
-            background-color: #f0f0f0;
-        }
-        #reader {
-            width: 100%;
-            height: 300px;
-            border: 1px solid #d9d9d9;
-            border-radius: 10px;
-            overflow: hidden;
-            background-color: #fff;
-        }
-        .reader-wrap {
-            position: relative;
-            width: 100%;
-            margin: 15px auto;
-        }
-        .reader-wrap.is-hidden {
-            display: none;
-        }
-        .reader-controls {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-        }
-        .reader-controls.is-hidden {
-            display: none;
-        }
-        #result {
-            margin-top: 20px;
-        }
-        .result-link-btn {
-            display: block;
-            width: 100%;
-            margin: 0 auto;
-            padding: 12px 16px;
-            border-radius: 8px;
-            border: 1px solid #cfd8dc;
-            background-color: #f8fafb;
-            color: #1f2933;
-            font-weight: bold;
-            text-decoration: none;
-            transition: background-color 0.2s ease;
-            box-sizing: border-box;
-        }
-        .result-link-btn:hover {
-            background-color: #eef3f6;
-        }
-        .result-link-btn.is-disabled {
-            color: #7b8794;
-            background-color: #f0f0f0;
-            border-color: #e4e7eb;
-            pointer-events: none;
-            cursor: not-allowed;
-        }
-        .btn {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            margin: 5px;
-        }
-        .btn:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        .btn-stop {
-            background-color: #dc3545;
-        }
-        #start-btn {
-            display: block;
-            margin: 0 auto;
-            border-radius: 50px;
-            position: fixed;
-            bottom: 50px;
-            right: 20px;
-            padding: 10px 20px;
-        }
-        .container {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 100;
-            background-color: rgba(0, 0, 0, 0.6);
-            justify-content: center;
-            align-items: center;
-        }
-        .container.is-open {
-            display: flex;
-        }
-        .container__dialog {
-            background: #fff;
-            border-radius: 12px;
-            padding: 20px;
-            width: 90%;
-            max-width: 540px;
-            position: relative;
-        }
-        .container__close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: none;
-            font-size: 20px;
-            line-height: 1;
-            cursor: pointer;
-            color: #7b8794;
-            border-radius: 4px;
-        }
-        .container__close-btn:hover {
-            color: #1f2933;
-            background-color: #f0f0f0;
-        }
-    </style>
+    <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
@@ -140,19 +14,18 @@
     <!-- カメラ起動 / 停止ボタン -->
     <button id="start-btn" class="btn">カメラを起動する</button>
     
-    <div class="container" id="modal">
-        <div class="container__dialog">
-            <button class="container__close-btn" id="close-btn" aria-label="閉じる">&times;</button>
-            <div class="reader-wrap">
-                <div id="reader-controls" class="reader-controls is-hidden">
-                    <button id="stop-btn" class="btn btn-stop" disabled>停止する</button>
-                </div>
+
+    <!-- モーダル & カメラ画面 -->
+    <div class="p-qr-modal" id="modal">
+        <div class="p-qr-modal__dialog">
+            <button class="p-qr-modal__close-btn" id="close-btn" aria-label="閉じる">&times;</button>
+            <div class="p-qr-reader">
                 <div id="reader"></div>
             </div>
             <div id="result">
                 <a
                     id="result-link"
-                    class="result-link-btn is-disabled"
+                    class="p-qr-result-link is-disabled"
                     href="#"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -163,107 +36,8 @@
             </div>
         </div>
     </div>
+    <!-- モーダル & カメラ画面 -->
 
-
-    <script>
-        const html5QrCode = new Html5Qrcode("reader");
-        const startBtn = document.getElementById('start-btn');
-        const stopBtn = document.getElementById('stop-btn');
-        const readerControls = document.getElementById('reader-controls');
-        const resultLink = document.getElementById('result-link');
-        const modal = document.getElementById('modal');
-        const closeBtn = document.getElementById('close-btn');
-        const readerWrap = document.querySelector('.reader-wrap');
-
-        function disableResultLink(message) {
-            resultLink.innerText = message;
-            resultLink.href = '#';
-            resultLink.classList.add('is-disabled');
-            resultLink.setAttribute('aria-disabled', 'true');
-        }
-
-        function enableResultLink(url) {
-            resultLink.innerText = `読み取り成功: ${url}`;
-            resultLink.href = url;
-            resultLink.classList.remove('is-disabled');
-            resultLink.setAttribute('aria-disabled', 'false');
-        }
-
-        // URLかどうか判定する関数
-        function isValidUrl(string) {
-            try {
-                new URL(string);
-                return true;
-            } catch (_) {
-                return false;  
-            }
-        }
-
-        // 読み取り成功時の処理
-        function onScanSuccess(decodedText, decodedResult) {
-            console.log(`Scan result: ${decodedText}`, decodedResult);
-
-            html5QrCode.stop().then(() => {
-                startBtn.disabled = false;
-                stopBtn.disabled = true;
-                readerControls.classList.add('is-hidden');
-                readerWrap.classList.add('is-hidden');
-
-                if (isValidUrl(decodedText)) {
-                    enableResultLink(decodedText);
-                } else {
-                    disableResultLink(`読み取り成功: ${decodedText}（URLではありません）`);
-                }
-            }).catch((err) => {
-                console.error("カメラの停止に失敗しました", err);
-            });
-        }
-
-        // カメラ起動処理
-        function startCamera() {
-            modal.classList.add('is-open');
-            disableResultLink('スキャン中...');
-
-            html5QrCode.start(
-                { facingMode: "environment" }, // 背面カメラ
-                {
-                    fps: 10,
-                    qrbox: (w, h) => {
-                        const size = Math.min(w, h) * 0.8;
-                        return { width: size, height: size };
-                    }
-                },
-                onScanSuccess,
-                (errorMessage) => { /* スキャン中のエラー無視 */ }
-            ).then(() => {
-                startBtn.disabled = true;
-                stopBtn.disabled = false;
-                readerControls.classList.remove('is-hidden');
-            }).catch((err) => {
-                modal.classList.remove('is-open');
-                console.error("カメラの起動に失敗しました", err);
-                alert("カメラの起動に失敗しました。");
-            });
-        }
-
-        // カメラ停止処理
-        function stopCamera() {
-            html5QrCode.stop().then(() => {
-                modal.classList.remove('is-open');
-                readerWrap.classList.remove('is-hidden');
-                startBtn.disabled = false;
-                stopBtn.disabled = true;
-                readerControls.classList.add('is-hidden');
-                disableResultLink('ここに読み取り結果が表示されます');
-            }).catch((err) => {
-                console.error("カメラの停止に失敗しました", err);
-            });
-        }
-
-        // イベントリスナーの設定
-        startBtn.addEventListener('click', startCamera);
-        stopBtn.addEventListener('click', stopCamera);
-        closeBtn.addEventListener('click', stopCamera);
-    </script>
+    <script src="assets/main.js"></script>
 </body>
 </html>

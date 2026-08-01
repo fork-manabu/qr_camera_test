@@ -1,0 +1,21 @@
+{
+  "name": "camera_test",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "sass src/style.scss assets/style.css && esbuild src/main.ts --bundle --outfile=assets/main.js --platform=browser",
+    "dev": "sass --watch src/style.scss assets/style.css & esbuild src/main.ts --bundle --outfile=assets/main.js --platform=browser --serve=3000 --servedir=."
+  },
+  "dependencies": {
+    "html5-qrcode": "^2.3.8"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "sass": "^1.89.0",
+    "typescript": "^5.7.0"
+  },
+  "allowScripts": {
+    "esbuild@0.24.2": true,
+    "@parcel/watcher@2.6.0": true
+  }
+}
