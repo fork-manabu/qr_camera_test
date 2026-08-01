@@ -1,7 +1,7 @@
 import { Html5Qrcode } from 'html5-qrcode';
 
 class QrRead {
-    private readonly html5QrCode = new Html5Qrcode('reader');
+    private readonly html5QrCode = new Html5Qrcode('js-qr-container');
     private readonly startBtn = document.querySelector('.js-qr-start-btn') as HTMLButtonElement;
     private readonly resultLink = document.querySelector('.js-qr-result-link') as HTMLAnchorElement;
     private readonly modal = document.querySelector('.js-qr-modal') as HTMLElement;

@@ -29367,7 +29367,7 @@
   // src/modules/campaign/qrRead.ts
   var QrRead = class _QrRead {
     constructor() {
-      this.html5QrCode = new Html5Qrcode("reader");
+      this.html5QrCode = new Html5Qrcode("js-qr-container");
       this.startBtn = document.querySelector(".js-qr-start-btn");
       this.resultLink = document.querySelector(".js-qr-result-link");
       this.modal = document.querySelector(".js-qr-modal");
