@@ -29373,10 +29373,21 @@
       this.modal = document.querySelector(".js-qr-modal");
       this.closeBtn = document.querySelector(".js-qr-close-btn");
       this.readerWrap = document.querySelector(".js-qr-reader");
+      this.scanInstruction = document.querySelector(".js-qr-instruction");
+      this.scanResultInstruction = document.querySelector(".js-qr-instruction--result");
     }
     init() {
+      this.showScanInstruction();
       this.startBtn.addEventListener("click", () => this.onStartCamera());
       this.closeBtn.addEventListener("click", () => this.onStopCamera());
+    }
+    showScanInstruction() {
+      this.scanInstruction.classList.remove("is-hidden");
+      this.scanResultInstruction.classList.add("is-hidden");
+    }
+    showScanResultInstruction() {
+      this.scanInstruction.classList.add("is-hidden");
+      this.scanResultInstruction.classList.remove("is-hidden");
     }
     disableResultLink(message) {
       this.resultLink.innerText = message;
@@ -29398,22 +29409,32 @@
         return false;
       }
     }
+    stopScannerSafely() {
+      try {
+        return this.html5QrCode.stop().then(() => void 0).catch((err) => {
+          console.error("\u30AB\u30E1\u30E9\u306E\u505C\u6B62\u306B\u5931\u6557\u3057\u307E\u3057\u305F", err);
+        });
+      } catch (err) {
+        console.error("\u30AB\u30E1\u30E9\u306E\u505C\u6B62\u306B\u5931\u6557\u3057\u307E\u3057\u305F", err);
+        return Promise.resolve();
+      }
+    }
     onScanSuccess(decodedText) {
       console.log(`Scan result: ${decodedText}`);
-      this.html5QrCode.stop().then(() => {
+      this.stopScannerSafely().then(() => {
         this.startBtn.disabled = false;
         this.readerWrap.classList.add("is-hidden");
+        this.showScanResultInstruction();
         if (_QrRead.isValidUrl(decodedText)) {
           this.enableResultLink(decodedText);
         } else {
           this.disableResultLink(`\u8AAD\u307F\u53D6\u308A\u6210\u529F: ${decodedText}\uFF08URL\u3067\u306F\u3042\u308A\u307E\u305B\u3093\uFF09`);
         }
-      }).catch((err) => {
-        console.error("\u30AB\u30E1\u30E9\u306E\u505C\u6B62\u306B\u5931\u6557\u3057\u307E\u3057\u305F", err);
       });
     }
     onStartCamera() {
       this.modal.classList.add("is-open");
+      this.showScanInstruction();
       this.disableResultLink("\u30B9\u30AD\u30E3\u30F3\u4E2D...");
       this.html5QrCode.start(
         { facingMode: "environment" },
@@ -29436,13 +29457,12 @@
       });
     }
     onStopCamera() {
-      this.html5QrCode.stop().then(() => {
+      this.stopScannerSafely().finally(() => {
         this.modal.classList.remove("is-open");
         this.readerWrap.classList.remove("is-hidden");
         this.startBtn.disabled = false;
+        this.showScanInstruction();
         this.disableResultLink("\u3053\u3053\u306B\u8AAD\u307F\u53D6\u308A\u7D50\u679C\u304C\u8868\u793A\u3055\u308C\u307E\u3059");
-      }).catch((err) => {
-        console.error("\u30AB\u30E1\u30E9\u306E\u505C\u6B62\u306B\u5931\u6557\u3057\u307E\u3057\u305F", err);
       });
     }
   };

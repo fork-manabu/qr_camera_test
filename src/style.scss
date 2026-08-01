@@ -5,6 +5,10 @@ body {
     background-color: #f0f0f0;
 }
 
+.is-hidden {
+    display: none;
+}
+
 // QR Code Reader Styles
 #js-qr-container {
     width: 100%;

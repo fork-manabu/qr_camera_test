@@ -7,10 +7,23 @@ class QrRead {
     private readonly modal = document.querySelector('.js-qr-modal') as HTMLElement;
     private readonly closeBtn = document.querySelector('.js-qr-close-btn') as HTMLButtonElement;
     private readonly readerWrap = document.querySelector('.js-qr-reader') as HTMLElement;
+    private readonly scanInstruction = document.querySelector('.js-qr-instruction') as HTMLElement;
+    private readonly scanResultInstruction = document.querySelector('.js-qr-instruction--result') as HTMLElement;
 
     init(): void {
+        this.showScanInstruction();
         this.startBtn.addEventListener('click', () => this.onStartCamera());
         this.closeBtn.addEventListener('click', () => this.onStopCamera());
+    }
+
+    private showScanInstruction(): void {
+        this.scanInstruction.classList.remove('is-hidden');
+        this.scanResultInstruction.classList.add('is-hidden');
+    }
+
+    private showScanResultInstruction(): void {
+        this.scanInstruction.classList.add('is-hidden');
+        this.scanResultInstruction.classList.remove('is-hidden');
     }
 
     private disableResultLink(message: string): void {
@@ -36,25 +49,36 @@ class QrRead {
         }
     }
 
+    private stopScannerSafely(): Promise<void> {
+        try {
+            return this.html5QrCode.stop().then(() => undefined).catch((err: unknown) => {
+                console.error('カメラの停止に失敗しました', err);
+            });
+        } catch (err: unknown) {
+            console.error('カメラの停止に失敗しました', err);
+            return Promise.resolve();
+        }
+    }
+
     private onScanSuccess(decodedText: string): void {
         console.log(`Scan result: ${decodedText}`);
 
-        this.html5QrCode.stop().then(() => {
+        this.stopScannerSafely().then(() => {
             this.startBtn.disabled = false;
             this.readerWrap.classList.add('is-hidden');
+            this.showScanResultInstruction();
 
             if (QrRead.isValidUrl(decodedText)) {
                 this.enableResultLink(decodedText);
             } else {
                 this.disableResultLink(`読み取り成功: ${decodedText}（URLではありません）`);
             }
-        }).catch((err: unknown) => {
-            console.error('カメラの停止に失敗しました', err);
         });
     }
 
     private onStartCamera(): void {
         this.modal.classList.add('is-open');
+        this.showScanInstruction();
         this.disableResultLink('スキャン中...');
 
         this.html5QrCode.start(
@@ -78,13 +102,12 @@ class QrRead {
     }
 
     private onStopCamera(): void {
-        this.html5QrCode.stop().then(() => {
+        this.stopScannerSafely().finally(() => {
             this.modal.classList.remove('is-open');
             this.readerWrap.classList.remove('is-hidden');
             this.startBtn.disabled = false;
+            this.showScanInstruction();
             this.disableResultLink('ここに読み取り結果が表示されます');
-        }).catch((err: unknown) => {
-            console.error('カメラの停止に失敗しました', err);
         });
     }
 }

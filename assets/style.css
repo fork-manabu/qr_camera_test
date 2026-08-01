@@ -5,6 +5,10 @@ body {
   background-color: #f0f0f0;
 }
 
+.is-hidden {
+  display: none;
+}
+
 #js-qr-container {
   width: 100%;
   border: 1px solid #d9d9d9;
