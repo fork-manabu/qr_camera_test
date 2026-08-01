@@ -12,20 +12,19 @@
     <h2>QRコードリーダー</h2>
     
     <!-- カメラ起動 / 停止ボタン -->
-    <button id="start-btn" class="btn">カメラを起動する</button>
+    <button class="btn p-qr-start-btn js-qr-start-btn">カメラを起動する</button>
     
 
     <!-- モーダル & カメラ画面 -->
-    <div class="p-qr-modal" id="modal">
+    <div class="p-qr-modal js-qr-modal">
         <div class="p-qr-modal__dialog">
-            <button class="p-qr-modal__close-btn" id="close-btn" aria-label="閉じる">&times;</button>
-            <div class="p-qr-reader">
+            <button class="p-qr-modal__close-btn js-qr-close-btn" aria-label="閉じる">&times;</button>
+            <div class="p-qr-reader js-qr-reader">
                 <div id="reader"></div>
             </div>
-            <div id="result">
+            <div class="p-qr-result">
                 <a
-                    id="result-link"
-                    class="p-qr-result-link is-disabled"
+                    class="p-qr-result-link js-qr-result-link is-disabled"
                     href="#"
                     target="_blank"
                     rel="noopener noreferrer"

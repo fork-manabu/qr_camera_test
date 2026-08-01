@@ -23,7 +23,7 @@ body {
   display: none;
 }
 
-#result {
+.p-qr-result {
   margin-top: 20px;
 }
 
@@ -67,7 +67,7 @@ body {
   cursor: not-allowed;
 }
 
-#start-btn {
+.p-qr-start-btn {
   display: block;
   margin: 0 auto;
   border-radius: 50px;

@@ -2,11 +2,11 @@ import { Html5Qrcode } from 'html5-qrcode';
 
 class QrRead {
     private readonly html5QrCode = new Html5Qrcode('reader');
-    private readonly startBtn = document.getElementById('start-btn') as HTMLButtonElement;
-    private readonly resultLink = document.getElementById('result-link') as HTMLAnchorElement;
-    private readonly modal = document.getElementById('modal') as HTMLElement;
-    private readonly closeBtn = document.getElementById('close-btn') as HTMLButtonElement;
-    private readonly readerWrap = document.querySelector('.p-qr-reader') as HTMLElement;
+    private readonly startBtn = document.querySelector('.js-qr-start-btn') as HTMLButtonElement;
+    private readonly resultLink = document.querySelector('.js-qr-result-link') as HTMLAnchorElement;
+    private readonly modal = document.querySelector('.js-qr-modal') as HTMLElement;
+    private readonly closeBtn = document.querySelector('.js-qr-close-btn') as HTMLButtonElement;
+    private readonly readerWrap = document.querySelector('.js-qr-reader') as HTMLElement;
 
     init(): void {
         this.startBtn.addEventListener('click', () => this.onStartCamera());
